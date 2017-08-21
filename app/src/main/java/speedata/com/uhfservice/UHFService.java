@@ -299,7 +299,7 @@ public class UHFService extends Service {
                     SystemClock.sleep(10);
                     //监听连接 ，如果无连接就会处于阻塞状态，一直在这等着
                     transferSocket = btServer.accept();
-                    EventBus.getDefault().post(new MsgEvent("BluetoothConnect", "连接成功"));
+                    EventBus.getDefault().post(new MsgEvent("BluetoothConnect", "连接成功\n"));
                     int openDevStatus = sharedXmlUtil.read("openDevStatus", -1);
                     if (openDevStatus != 0) {
                         result = "N:ERR,0,RFID_COMM_OPEN_ERROR" + "\r\n";
@@ -315,7 +315,7 @@ public class UHFService extends Service {
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d(TAG, "ServerSocketThread: IOException");
-                    EventBus.getDefault().post(new MsgEvent("BluetoothConnect", "连接断开"));
+                    EventBus.getDefault().post(new MsgEvent("BluetoothConnect", "连接断开\n"));
                 }
             }
         }
@@ -339,20 +339,10 @@ public class UHFService extends Service {
                     if (bytesRead < 0) {
                         mReceiveThread.interrupt();
                         mReceiveThread = null;
-                        EventBus.getDefault().post(new MsgEvent("BluetoothConnect", "连接断开"));
+                        EventBus.getDefault().post(new MsgEvent("BluetoothConnect", "连接断开\n"));
                         continue;
                     }
-                    String result = "";
-                    while ((bytesRead == bufferSize)
-                            && (buffer[bufferSize - 1] != 0)) {
-                        result = result + new String(buffer, 0, bytesRead - 1);
-                        bytesRead = inputstream.read(buffer);
-                    }
-                    StringBuilder incoming = new StringBuilder();
-                    result = result + new String(buffer, 0, bytesRead - 1);
-                    incoming.append(result);
-
-                    String receiveStr = incoming + "";
+                    String receiveStr = new String(buffer, 0, bytesRead);
                     receiveStr = receiveStr.replace("\r", "").replace("\\\n", "").replace("\n", "")
                             .replace("<CR><LF>", "");
                     EventBus.getDefault().post(new MsgEvent("tcp_receiver", receiveStr));
